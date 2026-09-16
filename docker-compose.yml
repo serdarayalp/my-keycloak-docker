@@ -44,7 +44,12 @@ services:
     # Der Startbefehl für Keycloak. start-dev aktiviert den
     # Entwicklungsmodus (HTTP statt erzwungenem HTTPS, automatische Schema-Updates und
     # vereinfachte Sicherheitseinstellungen).
-    command: start-dev
+    #
+    # Standardmäßig zwischenspeichert Keycloak Theme-Dateien im Speicher.
+    # Damit Änderungen an deinen Templates/CSS beim Neuladen der Seite im Browser sofort
+    # sichtbar werden, füge den Befehl --spi-theme-cache-themes=false und --spi-theme-cache-templates=false
+    # zum command in deiner docker-compose.yml hinzu:
+    command: start-dev --spi-theme-cache-themes=false --spi-theme-cache-templates=false
     # Konfiguriert die Anbindung und den initialen Admin-Zugang:
     environment:
       # Sagt Keycloak, dass es den PostgreSQL-Datenbanktreiber verwenden soll.
@@ -64,6 +69,8 @@ services:
     # Rechner unter http://localhost:8080 erreichbar.
     ports:
       - "8080:8080"
+    volumes:
+      - ./themes:/opt/keycloak/themes
     # Legt die Start-Reihenfolge fest. Docker wartet mit dem Start des
     # Keycloak-Containers, bis der postgres-Container gestartet wurde.
     depends_on:
