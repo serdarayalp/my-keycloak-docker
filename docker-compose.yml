@@ -1,0 +1,75 @@
+# Gibt das Dateiformat der Docker-Compose-Spezifikation an.
+# Version 3.8 ist ein etablierter Standard für moderne Docker-Setups.
+version: '3.8'
+
+# Definiert die einzelnen Container (Dienste), die zusammen gestartet werden sollen.
+# In diesem Fall sind das postgres und keycloak.
+services:
+  # Der frei wählbare Name des ersten Dienstes innerhalb der Compose-Datei.
+  postgres:
+    # Welches vorgefertigte Docker-Image verwendet wird. Hier wird die offizielle
+    # PostgreSQL-Version 16 aus dem Docker Hub heruntergeladen.
+    image: postgres:16
+    # Vergibt einen festen Namen für den laufenden Container auf deinem System,
+    # anstatt dass Docker einen zufälligen Namen generiert.
+    container_name: keycloak_postgres
+    # Setzt Umgebungsvariablen im Postgres-Container zur automatischen Initialisierung der Datenbank.
+    environment:
+      # Erstellt beim ersten Start automatisch eine Datenbank namens keycloak.
+      POSTGRES_DB: keycloak
+      # Erstellt den Datenbank-Benutzer keycloak.
+      POSTGRES_USER: keycloak
+      # Setzt das zugehörige Passwort für diesen Benutzer.
+      POSTGRES_PASSWORD: keycloak_password
+    # Verknüpft das Docker-Volume postgres_data mit dem internen Datenpfad der Datenbank.
+    # Dadurch bleiben deine Daten (Benutzer, Realms etc.) gespeichert, selbst wenn der
+    # Container gestoppt oder gelöscht wird.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Leitet den Port durch (Host-Port:Container-Port). Damit kannst du dich bei
+    # Bedarf auch von deinem Host-System (z. B. via DBeaver oder psql) direkt mit
+    # der Datenbank verbinden.
+    ports:
+      - "5432:5432"
+    # Weist Docker an, den Container bei Abstürzen oder Systemneustarts automatisch neu zu starten,
+    # außer er wurde manuell gestoppt.
+    restart: unless-stopped
+
+  # Der Name des zweiten Dienstes.
+  keycloak:
+    # Das offizielle Keycloak-Image aus der Quay-Registry.
+    image: quay.io/keycloak/keycloak:latest
+    # Der feste Containername für den Keycloak-Server.
+    container_name: keycloak_server
+    # Der Startbefehl für Keycloak. start-dev aktiviert den
+    # Entwicklungsmodus (HTTP statt erzwungenem HTTPS, automatische Schema-Updates und
+    # vereinfachte Sicherheitseinstellungen).
+    command: start-dev
+    # Konfiguriert die Anbindung und den initialen Admin-Zugang:
+    environment:
+      # Sagt Keycloak, dass es den PostgreSQL-Datenbanktreiber verwenden soll.
+      KC_DB: postgres
+      # Die JDBC-Verbindungs-URL. Wichtig: Das Wort postgres nach // ist der Servicename
+      # des Postgres-Containers, den Docker automatisch als Hostnamen auflöst.
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      # Der Benutzername zur Authentifizierung an der PostgreSQL-Datenbank.
+      KC_DB_USERNAME: keycloak
+      # Das Passwort zur Authentifizierung an der Datenbank.
+      KC_DB_PASSWORD: keycloak_password
+      # Der Benutzername für das Keycloak-Admin-Konto (Admin Console).
+      KEYCLOAK_ADMIN: admin
+      # Das Passwort für das Keycloak-Admin-Konto.
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    # Macht die Keycloak-Weboberfläche auf deinem lokalen
+    # Rechner unter http://localhost:8080 erreichbar.
+    ports:
+      - "8080:8080"
+    # Legt die Start-Reihenfolge fest. Docker wartet mit dem Start des
+    # Keycloak-Containers, bis der postgres-Container gestartet wurde.
+    depends_on:
+      - postgres
+    # Automatische Neustart-Regel bei Abstürzen oder Systemneustarts.
+    restart: unless-stopped
+# Deklariert das Named Volume, das oben unter dem postgres-Dienst eingebunden wird. Docker verwaltet diesen Speicherbereich eigenständig auf deiner Festplatte.
+volumes:
+  postgres_data:
