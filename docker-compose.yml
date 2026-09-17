@@ -75,10 +75,12 @@ services:
       - "8080:8080"
     volumes:
       - ./themes:/opt/keycloak/themes
+      - ./spis/my-keycloak-password-change-listener-1.0.0.jar:/opt/keycloak/providers/my-keycloak-password-change-listener-1.0.0.jar
     # Legt die Start-Reihenfolge fest. Docker wartet mit dem Start des
     # Keycloak-Containers, bis der postgres-Container gestartet wurde.
     depends_on:
       - postgres
+      - maildev
     # Automatische Neustart-Regel bei Abstürzen oder Systemneustarts.
     restart: unless-stopped
   # Das ist der frei wählbare Name des Dienstes innerhalb deiner
