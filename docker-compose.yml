@@ -85,10 +85,14 @@ services:
     # Hier wird die neueste Version (latest) des offiziellen
     # MailDev-Images aus der Docker-Hub-Registry verwendet.
     image: maildev/maildev:latest
+    # Legt einen festen, eindeutigen Namen für den laufenden Container fest.
+    # Wenn du docker ps ausführst, wird dir der Container genau unter diesem Namen angezeigt.
     container_name: keycloak_maildev
+    # Leitet Ports von deinem Host-System (deinem physischen Rechner)
+    # in den Docker-Container weiter. Die Syntax lautet immer "Host-Port:Container-Port".
     ports:
-      - "1080:1080"  # MailDev Web-Interface (Browser)
-      - "1025:1025"  # SMTP-Port für Mail-Versand
+      - "1080:1080"  # MailDev Web-Interface (Browser). Dadurch kannst du in deinem Browser auf dem Rechner die MailDev-Benutzeroberfläche unter http://localhost:1080 aufrufen, um die empfangenen E-Mails zu lesen.
+      - "1025:1025"  # SMTP-Port für Mail-Versand. Macht den SMTP-Server von MailDev erreichbar. Keycloak kann seine E-Mails direkt an den Host maildev auf Port 1025 schicken. (Falls du ein externes Werkzeug auf deinem Rechner hast, könnte es ebenfalls über localhost:1025 Mails an MailDev senden
     restart: unless-stopped
 # Deklariert das Named Volume, das oben unter dem postgres-Dienst eingebunden wird. Docker verwaltet diesen Speicherbereich eigenständig auf deiner Festplatte.
 volumes:
