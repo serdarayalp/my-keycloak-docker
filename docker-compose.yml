@@ -77,6 +77,19 @@ services:
       - postgres
     # Automatische Neustart-Regel bei Abstürzen oder Systemneustarts.
     restart: unless-stopped
+  # Das ist der frei wählbare Name des Dienstes innerhalb deiner
+  # Docker-Compose-Datei. Über diesen Namen (maildev) können andere
+  # Container im selben Docker-Netzwerk (wie Keycloak) diesen Container erreichen.
+  maildev:
+    # Gibt an, welches vorgefertigte Docker-Image heruntergeladen wird.
+    # Hier wird die neueste Version (latest) des offiziellen
+    # MailDev-Images aus der Docker-Hub-Registry verwendet.
+    image: maildev/maildev:latest
+    container_name: keycloak_maildev
+    ports:
+      - "1080:1080"  # MailDev Web-Interface (Browser)
+      - "1025:1025"  # SMTP-Port für Mail-Versand
+    restart: unless-stopped
 # Deklariert das Named Volume, das oben unter dem postgres-Dienst eingebunden wird. Docker verwaltet diesen Speicherbereich eigenständig auf deiner Festplatte.
 volumes:
   postgres_data:
