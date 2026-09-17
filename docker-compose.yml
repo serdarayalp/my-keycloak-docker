@@ -3,7 +3,7 @@
 version: '3.8'
 
 # Definiert die einzelnen Container (Dienste), die zusammen gestartet werden sollen.
-# In diesem Fall sind das postgres und keycloak.
+# In diesem Fall sind das postgres, keycloak und MailDev.
 services:
   # Der frei wählbare Name des ersten Dienstes innerhalb der Compose-Datei.
   postgres:
@@ -21,7 +21,7 @@ services:
       POSTGRES_USER: keycloak
       # Setzt das zugehörige Passwort für diesen Benutzer.
       POSTGRES_PASSWORD: keycloak_password
-    # Verknüpft das Docker-Volume postgres_data mit dem internen Datenpfad der Datenbank.
+    # Verknüpft das Docker-Volume postgres_data mit dem internen Datenpfad der Datenbank (im Container).
     # Dadurch bleiben deine Daten (Benutzer, Realms etc.) gespeichert, selbst wenn der
     # Container gestoppt oder gelöscht wird.
     volumes:
@@ -53,6 +53,10 @@ services:
     # Konfiguriert die Anbindung und den initialen Admin-Zugang:
     environment:
       # Sagt Keycloak, dass es den PostgreSQL-Datenbanktreiber verwenden soll.
+      # Es handelt sich um das Kürzel für den Datenbanktyp (Vendor).
+      # Keycloak muss wissen, welche Art von Datenbanktreiber und Dialekt es verwenden soll.
+      # Durch KC_DB: postgres teilt man Keycloak mit: „Verwende den PostgreSQL-Treiber.“
+      # Andere mögliche Werte für KC_DB wären beispielsweise mariadb, mssql, mysql oder oracle.
       KC_DB: postgres
       # Die JDBC-Verbindungs-URL. Wichtig: Das Wort postgres nach // ist der Servicename
       # des Postgres-Containers, den Docker automatisch als Hostnamen auflöst.
